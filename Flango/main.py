@@ -41,6 +41,7 @@ def get_main():
                 data = df.to_dict('records')
                 r = db[col].insert_many(data)
                 boolean = r.acknowledged
+                collections = db.collection_names()
     return render_template('index.html', collections = collections, boolean = boolean)
 
 if __name__ == "__main__":
