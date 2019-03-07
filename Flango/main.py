@@ -1,13 +1,17 @@
 from flask import Flask, request, render_template
 import pandas as pd
 from pymongo import MongoClient
+import json
+
 
 app = Flask(__name__, template_folder='Templates')
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 
-with open('config.txt') as f:
-    uri_database = f.read()
-    uri, database = uri_database.split('\n')
+with open('config.json') as f:
+    conf = f.read()
+    conf = json.loads(conf)
+    uri = conf['URI']
+    database = conf['Database']
 
 CONNECTION = MongoClient(uri,  connect = False)
 db = CONNECTION[database]
