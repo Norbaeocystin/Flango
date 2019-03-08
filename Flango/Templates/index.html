@@ -40,13 +40,16 @@ Collection Name:<input name="collection" type="text">
 </form>
 </div>
 <script>
-var boolean = {{boolean|tojson}} 
-var data = {{collections|tojson}}
+var boolean = {{boolean|tojson}} //it is for alert if insert was succesful
+var data = {{collections|tojson}} //existing collections
 if (boolean == true)
 {
  alert("Data have been inserted into Database"); 
 }
 function required()
+/* Function which checks emptyness of file and collection fields and also checks if name of collection already exists.
+If file or collection input is empty it will raise alert. Also will raise alert when collection name is already taken in database
+*/
 {
     var file = document.forms["form"]["file"].value;
     var collection = document.forms["form"]["collection"].value;
