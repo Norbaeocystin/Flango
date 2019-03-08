@@ -13,6 +13,7 @@ with open('config.json') as f:
     uri = conf['URI']
     database = conf['Database']
 
+#connection to mongodb
 CONNECTION = MongoClient(uri,  connect = False)
 db = CONNECTION[database]
 
@@ -22,13 +23,17 @@ def get_main():
     home
     '''
     boolean = False
+    # get existing collections in database
     collections = db.collection_names()
     if request.method == 'POST':
         # check if the post request has the file part
         file = request.files.get('file')
+        # get name for collection
         col = request.form.get('collection')
+        # get separator if csv will be imported
         sep = request.form.get('separator')
         if file and col:
+            # if collection name is non existent in database
             if not col in collections:
                 file_extension = file.filename.rsplit('.',1)[-1]
                 if file_extension == 'csv':
@@ -36,11 +41,13 @@ def get_main():
                 elif file_extension == 'xlsx':
                     df = pd.read_excel(file)
                 columns = df.columns.values
+                # drop columns which are Unnamed
                 columns = [item for item in columns if not 'Unnamed' in item ]
                 df = df[columns]
                 data = df.to_dict('records')
                 r = db[col].insert_many(data)
                 boolean = r.acknowledged
+                # refresh existing collections
                 collections = db.collection_names()
     return render_template('index.html', collections = collections, boolean = boolean)
 
