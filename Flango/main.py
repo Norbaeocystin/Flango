@@ -43,7 +43,16 @@ def get_main():
                 columns = df.columns.values
                 # drop columns which are Unnamed
                 columns = [item for item in columns if not 'Unnamed' in item ]
+                #replace dot in columns names
                 df = df[columns]
+                dot = [item for item in columns if '.' in item]
+                if dot:
+                    correct = {}
+                    for item in dot:
+                        correct[item] = item.replace('.',' ')
+                    df.rename(columns = correct, inplace = True)
+                #set NAN to ''
+                df.fillna('', inplace = True)
                 data = df.to_dict('records')
                 r = db[col].insert_many(data)
                 boolean = r.acknowledged
