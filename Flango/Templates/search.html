@@ -1,5 +1,45 @@
 <!DOCTYPE html>
 <html>
 <body>
+<script>
+//below parsing data as JSON
+var data = JSON.parse('{{settingsData}}'.split("&#34;").join('"'));
+var keys = Object.keys(data);
+var LedSensors = keys.filter(key => key.includes('Led'));
+var Ledlength = LedSensors.length/2;
+//example for populating table
+for (var i = 0; i< Ledlength; i++){
+    var ind = i;
+    var indie = ind + 1;
+    var rows = "ledTable" + ind;
+    var tr = document.createElement("TR");
+    tr.setAttribute("id", rows);
+    var x = document.createElement("INPUT");
+    x.setAttribute("type", "text");
+    x.setAttribute("name", "LedName_" + indie +'_');
+    x.setAttribute("value", data_["LedName_" + indie +'_']);
+    var y = document.createElement("INPUT");
+    y.setAttribute("type", "text");
+    y.setAttribute("name", "LedPin_" + indie + '_');
+    y.setAttribute("value", data_["LedPin_" + indie +'_']);
+    var z = document.createElement("BUTTON");
+    z.innerHTML = 'Delete';
+    z.setAttribute("class", "delete");
+    z.setAttribute("type", "button");
+    z.setAttribute("value", rows);
+    // add delete function to button on the right side
+    z.onclick = function() { 
+        var row = document.getElementById(this.value);
+        row.parentNode.removeChild(row);}; 
+    var tags = [x,y,z];
+    for(var j in tags)
+    {
+        var td = document.createElement("TD");
+        td.appendChild(tags[j]);
+        tr.appendChild(td)
+    }
+    ledTable.appendChild(tr);
+}
+</script>
 </body>
 </html>
