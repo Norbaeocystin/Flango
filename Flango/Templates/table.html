@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<style>
+#data {  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#data td, #data th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#data tr:nth-child(even){background-color: #f2f2f2;}
+
+#data tr:hover {background-color: #ddd;}
+
+#data th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+    td, th {
+        min-width: 3em;
+  width: 3em; 
+  max-width: 3em;
+    }
+</style>
+<body>
+<table id="data">
+</table>
+<script>
+//change to your fields just example
+var headers = {{headers|tojson|safe}};
+table = document.getElementById("data");
+tr = document.createElement('TR');
+table.append(tr);
+for (var item of headers)
+{
+    th = document.createElement('TH');
+    th.innerHTML += item;
+    tr.appendChild(th)
+    
+}
+
+var data = {{data|tojson|safe}};
+for (var i = 0; i < data.length; i++)
+{
+    doc = data[i];
+    tr_doc = document.createElement('TR');
+    for (var item of headers)
+    {
+        td = document.createElement('TD');
+        if (doc.hasOwnProperty(item))
+        {
+        td.innerHTML += doc[item];
+        }
+        else{td.innerHTML += "";}
+        tr_doc.appendChild(td);    
+    }
+    table.append(tr_doc)
+}
+</script>
+</body>
+</html>
