@@ -59,6 +59,103 @@ def get_main():
                 # refresh existing collections
                 collections = db.collection_names()
     return render_template('index.html', collections = collections, boolean = boolean)
+def collections_true(db, pipeline):
+    collections = db.list_collection_names()
+    found_in = []
+    counter = 0
+    match, project = pipeline
+    for item in collections:
+        results = db[item].count_documents(match['$match'])
+        if results:
+            counter += results
+            found_in.append(item)
+    return {'Found':counter, 'Collections':found_in}
+
+def get_docs_from_collections(db, pipeline, collections):
+    found_in = []
+    match, project = pipeline
+    for item in collections:
+        results = db[item].find(match['$match'], project['$project'])
+        records = list(results)
+        for record in records:
+            record['Emails'] = ', '.join(record.get('Emails',[]))
+            record['Collection'] = item
+        found_in.extend(records)
+    return found_in
+
+@app.route('/search', methods=['GET', 'POST'])
+def get_search():
+    # it is same as projected
+    HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
+    CONNECTION = MongoClient("localhost",  connect = False)
+    db = CONNECTION['WorkingOn2']
+    if request.method == 'POST':
+        dir(reque)
+        query = {}
+        for k,v in request.form.items():
+            if v:
+                query[k] = v
+        if query:
+            pipeline = create_pipeline(query)
+            result = collections_true(db, pipeline)
+            flash('Found {}'.format(result['Found']))
+            collections = result['Collections']
+            docs = get_docs_from_collections(db, pipeline, collections)
+            data = ';'.join(HEADER)
+            data += '\n'
+            for item in docs:
+                data += ';'.join([str(item.get(col_name, ' ')) for col_name in HEADER])
+                data += '\n'
+            output = make_response(data)
+            output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+            output.headers["Content-type"] = "text/csv"
+            #return output
+            return output
+    return render_template('search.html')
+
+@app.route('/<query>')
+def get_query(query):
+    if query == "query":
+        HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
+        CONNECTION = MongoClient("localhost",  connect = False)
+        db = CONNECTION['WorkingOn2']
+        query_dict = {}
+        for item in request.args:
+            k,v = item, request.args.get(item, '')
+            if v:
+                query_dict[k] = v
+        if query_dict:
+            pipeline = create_pipeline(query_dict)
+            result = collections_true(db, pipeline)
+            collections = result['Collections']
+            docs = get_docs_from_collections(db, pipeline, collections)
+            data = ';'.join(HEADER)
+            data += '\n'
+            for item in docs:
+                data += ';'.join([str(item.get(col_name, ' ')) for col_name in HEADER])
+                data += '\n'
+            output = make_response(data)
+            output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+            output.headers["Content-type"] = "text/csv"
+            #return output
+            return data, 200, {'Content-Type': 'text/css; charset=utf-8'}
+    if query == "table":
+        HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
+        CONNECTION = MongoClient("localhost",  connect = False)
+        db = CONNECTION['WorkingOn2']
+        query_dict = {}
+        for item in request.args:
+            k,v = item, request.args.get(item, '')
+            if v:
+                query_dict[k] = v
+        if query_dict:
+            pipeline = create_pipeline(query_dict)
+            result = collections_true(db, pipeline)
+            collections = result['Collections']
+            docs = get_docs_from_collections(db, pipeline, collections)
+            #return output
+            return render_template('table.html', data = docs, headers = HEADER)
+    return "<strong>Not found</strong>", 404
 
 if __name__ == "__main__":
     app.run(port= 4999)
