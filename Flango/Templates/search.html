@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html>
 <body>
+<form id="search">
+</form>
+<script>
+var fields = ['Company Name', 'Country','Full Address', 'Type', 'Category', 'Sub Category'];
+var length = fields.length;
+var searchForm = document.getElementById("search");
+for (var i = 0; i < length; i++)
+{
+    var item = fields[i];
+    searchForm.innerHTML += item + ":";
+    var input = document.createElement("INPUT");
+    input.setAttribute("type", "text");
+    input.setAttribute("name", item);
+    searchForm.appendChild(input);
+}
+</script>
 <script>
 //below parsing data as JSON
 var data = JSON.parse('{{settingsData}}'.split("&#34;").join('"'));
