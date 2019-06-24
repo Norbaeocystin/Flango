@@ -61,6 +61,7 @@ def get_main():
                 # refresh existing collections
                 collections = db.collection_names()
     return render_template('index.html', collections = collections, boolean = boolean)
+
 def collections_true(db, pipeline):
     collections = db.list_collection_names()
     found_in = []
