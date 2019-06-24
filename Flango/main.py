@@ -80,7 +80,9 @@ def get_docs_from_collections(db, pipeline, collections):
         results = db[item].find(match['$match'], project['$project'])
         records = list(results)
         for record in records:
+            #example of changing array to string
             record['Emails'] = ', '.join(record.get('Emails',[]))
+            # add name of collection as column to have info about collection where are data from
             record['Collection'] = item
         found_in.extend(records)
     return found_in
