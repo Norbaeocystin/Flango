@@ -3,6 +3,8 @@ import pandas as pd
 from pymongo import MongoClient
 import json
 
+#change to your fields which you want to be displayed on table and query dynamic webpages
+HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
 
 app = Flask(__name__, template_folder='Templates')
 app.config['SECRET_KEY'] = 'you-will-never-guess'
@@ -86,9 +88,6 @@ def get_docs_from_collections(db, pipeline, collections):
 @app.route('/search', methods=['GET', 'POST'])
 def get_search():
     # it is same as projected
-    HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
-    CONNECTION = MongoClient("localhost",  connect = False)
-    db = CONNECTION['WorkingOn2']
     if request.method == 'POST':
         dir(reque)
         query = {}
@@ -101,6 +100,7 @@ def get_search():
             flash('Found {}'.format(result['Found']))
             collections = result['Collections']
             docs = get_docs_from_collections(db, pipeline, collections)
+            #delimiter is semicollon ;
             data = ';'.join(HEADER)
             data += '\n'
             for item in docs:
@@ -109,16 +109,14 @@ def get_search():
             output = make_response(data)
             output.headers["Content-Disposition"] = "attachment; filename=export.csv"
             output.headers["Content-type"] = "text/csv"
-            #return output
+            #return .csv file with data to download
             return output
     return render_template('search.html')
 
 @app.route('/<query>')
 def get_query(query):
     if query == "query":
-        HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
-        CONNECTION = MongoClient("localhost",  connect = False)
-        db = CONNECTION['WorkingOn2']
+        # shows raw data as webpage
         query_dict = {}
         for item in request.args:
             k,v = item, request.args.get(item, '')
@@ -134,15 +132,13 @@ def get_query(query):
             for item in docs:
                 data += ';'.join([str(item.get(col_name, ' ')) for col_name in HEADER])
                 data += '\n'
-            output = make_response(data)
-            output.headers["Content-Disposition"] = "attachment; filename=export.csv"
-            output.headers["Content-type"] = "text/csv"
-            #return output
+            #output = make_response(data)
+            #output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+            #output.headers["Content-type"] = "text/csv"
             return data, 200, {'Content-Type': 'text/css; charset=utf-8'}
+        
     if query == "table":
-        HEADER = ['Company Name', 'Emails','Country','Full Address', 'Type', 'Category', 'Sub Category', 'Collection']
-        CONNECTION = MongoClient("localhost",  connect = False)
-        db = CONNECTION['WorkingOn2']
+        # shows data in html table 
         query_dict = {}
         for item in request.args:
             k,v = item, request.args.get(item, '')
@@ -153,7 +149,6 @@ def get_query(query):
             result = collections_true(db, pipeline)
             collections = result['Collections']
             docs = get_docs_from_collections(db, pipeline, collections)
-            #return output
             return render_template('table.html', data = docs, headers = HEADER)
     return "<strong>Not found</strong>", 404
 
